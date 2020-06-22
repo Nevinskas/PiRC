@@ -50,7 +50,7 @@ void js_axis_update(u_int8_t key_id, int16_t value)
 void js_read(int fd)
 {
 	struct js_event e;
-	u_int8_t buttons_state = 0;
+	u_int16_t keys_states = 0;
 
 	while (1){
 		ssize_t len = read(fd, &e, sizeof(e));
@@ -76,9 +76,9 @@ void js_read(int fd)
 			//printf("There is %s button event!\n", js_button_name(e.number));
 
 			if (e.value)
-				buttons_state |= (1 << e.number);
+				keys_states |= (1 << e.number);
 			else
-				buttons_state &= ~(1 << e.number);
+				keys_states &= ~(1 << e.number);
 		}
 
 		if (e.type & JS_EVENT_INIT)
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
 
 	bcm2835_gpio_fsel(PIN, BCM2835_GPIO_FSEL_ALT5);
 
-	bcm2835_pwm_set_clock(BCM2835_PWM_CLOCK_DIVIDER_4);
+	bcm2835_pwm_set_clock(BCM2835_PWM_CLOCK_DIVIDER_2);
 	bcm2835_pwm_set_mode(PWM_CHANNEL, 1, 1);
 	bcm2835_pwm_set_range(PWM_CHANNEL, RANGE);
 
