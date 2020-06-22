@@ -6,41 +6,60 @@
 #include <stdio.h>
 #include <bcm2835.h>
 
-#define BIT(x)		(1 << (x))
-
-#define PIN RPI_GPIO_P1_12
-#define PWM_CHANNEL 0
-#define RANGE 65535
-
+#include "js_ds4.h"
+#include "main.h"
 
 const char joystick[] = "/dev/input/js0";
 
 char* js_button_name(u_int8_t key_id);
 char* js_axis_name(u_int8_t key_id);
+int hw_init(void);
 
-void js_axis_update(u_int8_t key_id, int16_t value)
+void js_button_update(u_int8_t key_id, int16_t value, u_int16_t keys_states)
 {
 	switch (key_id)
 	{
-	case 0 :
-		//"left analog x-axis";
-	case 1 :
-		//"left analog y-axis";
-	case 2 :
-		//"left trigger (L2)";
-	case 3 :
-		//"right analog x-axis";
-	case 4 :
-		//"right analog y-axis";
+	case KEY_CROSS :
+	case KEY_CIRCLE :
+	case KEY_TRIANGLE :
+	case KEY_SQUARE :
+	case KEY_L1 :
+	case KEY_R1 :
 		return;
-	case 5 :
-		//"right trigger (R2)";
-		bcm2835_pwm_set_data(PWM_CHANNEL, (u_int32_t)(value + 32767));
+	case KEY_L2 :
+		if (keys_states & BIT(KEY_R2))
+			bcm2835_pwm_set_mode(PWM_CHANNEL, 1, (value ? 0 : 1));
 		return;
-	case 6 :
-		//"d-pad x-axis";
-	case 7 :
-		//"d-pad y-axis";
+
+	case KEY_R2 :
+		if (keys_states & BIT(KEY_L2))
+			bcm2835_pwm_set_mode(PWM_CHANNEL, 1, (value ? 0 : 1));
+		return;
+	case KEY_SHARE :
+	case KEY_OPTIONS :
+	case KEY_PS_LOGO :
+	case KEY_L_ANALOG :
+	case KEY_R_ANALOG :
+	default :
+		return;
+	}
+}
+
+void js_axis_update(u_int8_t key_id, int16_t value, u_int16_t keys_states)
+{
+	switch (key_id)
+	{
+	case AXIS_LANALOG_X :
+	case AXIS_LANALOG_Y :
+	case AXIS_L2 :
+	case AXIS_RANALOG_X :
+	case AXIS_RANALOG_Y :
+		return;
+	case AXIS_R2 :
+		bcm2835_pwm_set_data(PWM_CHANNEL, (u_int32_t)(value + JS_AXIS_MAX));
+		return;
+	case AXIS_DPAD_X :
+	case AXIS_DPAD_Y :
 	default :
 		return;
 	}
@@ -65,13 +84,16 @@ void js_read(int fd)
 		if (len != sizeof(e))
 			return;
 
-		if (e.type == JS_EVENT_BUTTON) {
+		if (e.type == JS_EVENT_BUTTON)
+		{
 			//printf("There is %s button event!\n", js_button_name(e.number));
 
 			if (e.value)
-				keys_states |= (1 << e.number);
+				keys_states |= BIT(e.number);
 			else
-				keys_states &= ~(1 << e.number);
+				keys_states &= ~BIT(e.number);
+
+			js_button_update(e.number, e.value, keys_states);
 
 			//printf("Name: %s, state: %x\n", js_button_name(e.number), keys_states);
 		}
@@ -80,7 +102,7 @@ void js_read(int fd)
 		{
 			//printf("There is an %s event!\n", js_axis_name(e.number));
 			//printf("Value: %d \n", e.value);
-			js_axis_update(e.number, e.value);
+			js_axis_update(e.number, e.value, keys_states);
 		}
 
 		if (e.type & JS_EVENT_INIT)
@@ -121,6 +143,21 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	if (hw_init())
+	{
+		printf("Failed hardware init");
+		return 1;
+	}
+
+	js_init(fd);
+
+	close(fd);
+
+	return 0;
+}
+
+int hw_init(void)
+{
 	if (!bcm2835_init())
 		return 1;
 
@@ -128,11 +165,7 @@ int main(int argc, char **argv)
 
 	bcm2835_pwm_set_clock(BCM2835_PWM_CLOCK_DIVIDER_2);
 	bcm2835_pwm_set_mode(PWM_CHANNEL, 1, 1);
-	bcm2835_pwm_set_range(PWM_CHANNEL, RANGE);
-
-	js_init(fd);
-
-	close(fd);
+	bcm2835_pwm_set_range(PWM_CHANNEL, PWM_RANGE);
 
 	return 0;
 }
