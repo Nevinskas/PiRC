@@ -82,7 +82,8 @@ void js_read(int fd)
 		}
 
 		if (e.type & JS_EVENT_INIT)
-			printf("Init: type: 0x%x number: %x \n", e.type, e.number);
+			continue;
+			//printf("Init: type: 0x%x number: %x \n", e.type, e.number);
 
 	}
 
