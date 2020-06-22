@@ -64,13 +64,6 @@ void js_read(int fd)
 
 		if (len != sizeof(e))
 			return;
-		
-		if (e.type == JS_EVENT_AXIS)
-		{
-			//printf("There is an %s event!\n", js_axis_name(e.number));
-			//printf("Value: %d \n", e.value);
-			js_axis_update(e.number, e.value);
-		}
 
 		if (e.type == JS_EVENT_BUTTON) {
 			//printf("There is %s button event!\n", js_button_name(e.number));
@@ -79,6 +72,15 @@ void js_read(int fd)
 				keys_states |= (1 << e.number);
 			else
 				keys_states &= ~(1 << e.number);
+
+			//printf("Name: %s, state: %x\n", js_button_name(e.number), keys_states);
+		}
+
+		if (e.type == JS_EVENT_AXIS)
+		{
+			//printf("There is an %s event!\n", js_axis_name(e.number));
+			//printf("Value: %d \n", e.value);
+			js_axis_update(e.number, e.value);
 		}
 
 		if (e.type & JS_EVENT_INIT)
