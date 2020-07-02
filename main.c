@@ -59,13 +59,18 @@ void js_axis_update(u_int8_t key_id, int16_t value, u_int16_t keys_states)
 	{
 	case AXIS_LANALOG_X :
 	case AXIS_LANALOG_Y :
+		return;
 	case AXIS_L2 :
+		if (keys_states & BIT(KEY_R2))
+			return;
+		bcm2835_pwm_set_data(PWM_CHANNEL, (u_int32_t)(value + JS_AXIS_MAX));
 	case AXIS_RANALOG_X :
 	case AXIS_RANALOG_Y :
 		return;
 	case AXIS_R2 :
+		if (keys_states & BIT(KEY_L2))
+			return;
 		bcm2835_pwm_set_data(PWM_CHANNEL, (u_int32_t)(value + JS_AXIS_MAX));
-		return;
 	case AXIS_DPAD_X :
 	case AXIS_DPAD_Y :
 	default :
