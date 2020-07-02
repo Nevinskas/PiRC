@@ -15,6 +15,13 @@ char* js_button_name(u_int8_t key_id);
 char* js_axis_name(u_int8_t key_id);
 int hw_init(void);
 
+void set_forward(void)
+{
+	bcm2835_gpio_write(RPI_V2_GPIO_P1_13, LOW);
+	bcm2835_gpio_write(RPI_V2_GPIO_P1_11, HIGH);
+	return;
+}
+
 void js_button_update(u_int8_t key_id, int16_t value, u_int16_t keys_states)
 {
 	switch (key_id)
@@ -34,6 +41,8 @@ void js_button_update(u_int8_t key_id, int16_t value, u_int16_t keys_states)
 	case KEY_R2 :
 		if (keys_states & BIT(KEY_L2))
 			bcm2835_pwm_set_mode(PWM_CHANNEL, 1, (value ? 0 : 1));
+		else if (value)
+			set_forward();
 		return;
 	case KEY_SHARE :
 	case KEY_OPTIONS :
@@ -166,6 +175,18 @@ int hw_init(void)
 	bcm2835_pwm_set_clock(BCM2835_PWM_CLOCK_DIVIDER_2);
 	bcm2835_pwm_set_mode(PWM_CHANNEL, 1, 1);
 	bcm2835_pwm_set_range(PWM_CHANNEL, PWM_RANGE);
+
+	bcm2835_gpio_fsel(RPI_V2_GPIO_P1_11, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_write(RPI_V2_GPIO_P1_11, LOW);
+
+	bcm2835_gpio_fsel(RPI_V2_GPIO_P1_13, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_write(RPI_V2_GPIO_P1_13, LOW);
+
+	bcm2835_gpio_fsel(RPI_V2_GPIO_P1_15, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_write(RPI_V2_GPIO_P1_15, LOW);
+
+	bcm2835_gpio_fsel(RPI_V2_GPIO_P1_16, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_write(RPI_V2_GPIO_P1_16, LOW);
 
 	return 0;
 }
