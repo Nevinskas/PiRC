@@ -13,14 +13,11 @@ const char joystick[] = "/dev/input/js0";
 
 char* js_button_name(u_int8_t key_id);
 char* js_axis_name(u_int8_t key_id);
+void set_forward(void);
+void set_backward(void);
+void set_left(void);
+void set_right(void);
 int hw_init(void);
-
-void set_forward(void)
-{
-	bcm2835_gpio_write(RPI_V2_GPIO_P1_13, LOW);
-	bcm2835_gpio_write(RPI_V2_GPIO_P1_11, HIGH);
-	return;
-}
 
 void js_button_update(u_int8_t key_id, int16_t value, u_int16_t keys_states)
 {
@@ -36,6 +33,8 @@ void js_button_update(u_int8_t key_id, int16_t value, u_int16_t keys_states)
 	case KEY_L2 :
 		if (keys_states & BIT(KEY_R2))
 			bcm2835_pwm_set_mode(PWM_CHANNEL, 1, (value ? 0 : 1));
+		else if (value)
+			set_backward();
 		return;
 
 	case KEY_R2 :
@@ -189,6 +188,38 @@ int hw_init(void)
 	bcm2835_gpio_write(RPI_V2_GPIO_P1_16, LOW);
 
 	return 0;
+}
+
+void set_left(void)
+{
+	bcm2835_gpio_write(IN3, LOW);
+	bcm2835_gpio_write(IN2, HIGH);
+	//printf("set left\n");
+	return;
+}
+
+void set_right(void)
+{
+	bcm2835_gpio_write(IN2, LOW);
+	bcm2835_gpio_write(IN3, HIGH);
+	//printf("set right\n");
+	return;
+}
+
+void set_backward(void)
+{
+	bcm2835_gpio_write(IN0, LOW);
+	bcm2835_gpio_write(IN1, HIGH);
+	//printf("set backward\n");
+	return;
+}
+
+void set_forward(void)
+{
+	bcm2835_gpio_write(IN1, LOW);
+	bcm2835_gpio_write(IN0, HIGH);
+	//printf("set forward\n");
+	return;
 }
 
 char* js_button_name(u_int8_t key_id)
