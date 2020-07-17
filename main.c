@@ -32,14 +32,14 @@ void js_button_update(u_int8_t key_id, int16_t value, u_int16_t keys_states)
 		return;
 	case KEY_L2 :
 		if (keys_states & BIT(KEY_R2))
-			bcm2835_pwm_set_mode(PWM_CHANNEL, 1, (value ? 0 : 1));
+			bcm2835_pwm_set_mode(ACCEL_PWM_CH, 1, (value ? 0 : 1));
 		else if (value)
 			set_backward();
 		return;
 
 	case KEY_R2 :
 		if (keys_states & BIT(KEY_L2))
-			bcm2835_pwm_set_mode(PWM_CHANNEL, 1, (value ? 0 : 1));
+			bcm2835_pwm_set_mode(ACCEL_PWM_CH, 1, (value ? 0 : 1));
 		else if (value)
 			set_forward();
 		return;
@@ -58,19 +58,27 @@ void js_axis_update(u_int8_t key_id, int16_t value, u_int16_t keys_states)
 	switch (key_id)
 	{
 	case AXIS_LANALOG_X :
+		//printf("Joystick %s event. Value: %d \n", js_axis_name(key_id), value);
+		if (value > 0)
+			set_right();
+		else if (value < 0)
+			set_left();
+
+		bcm2835_pwm_set_data(TURN_PWM_CH, (u_int32_t)(abs(value)));
+		return;
 	case AXIS_LANALOG_Y :
 		return;
 	case AXIS_L2 :
 		if (keys_states & BIT(KEY_R2))
 			return;
-		bcm2835_pwm_set_data(PWM_CHANNEL, (u_int32_t)(value + JS_AXIS_MAX));
+		bcm2835_pwm_set_data(ACCEL_PWM_CH, (u_int32_t)(value + JS_AXIS_MAX));
 	case AXIS_RANALOG_X :
 	case AXIS_RANALOG_Y :
 		return;
 	case AXIS_R2 :
 		if (keys_states & BIT(KEY_L2))
 			return;
-		bcm2835_pwm_set_data(PWM_CHANNEL, (u_int32_t)(value + JS_AXIS_MAX));
+		bcm2835_pwm_set_data(ACCEL_PWM_CH, (u_int32_t)(value + JS_AXIS_MAX));
 	case AXIS_DPAD_X :
 	case AXIS_DPAD_Y :
 	default :
@@ -174,11 +182,16 @@ int hw_init(void)
 	if (!bcm2835_init())
 		return 1;
 
-	bcm2835_gpio_fsel(PIN, BCM2835_GPIO_FSEL_ALT5);
-
+	//Both PWM channels are driven by the same PWM clock.
 	bcm2835_pwm_set_clock(BCM2835_PWM_CLOCK_DIVIDER_2);
-	bcm2835_pwm_set_mode(PWM_CHANNEL, 1, 1);
-	bcm2835_pwm_set_range(PWM_CHANNEL, PWM_RANGE);
+
+	bcm2835_gpio_fsel(ACCEL_PIN, BCM2835_GPIO_FSEL_ALT5);
+	bcm2835_pwm_set_mode(ACCEL_PWM_CH, 1, 1);
+	bcm2835_pwm_set_range(ACCEL_PWM_CH, ACCEL_PWM_RANGE);
+
+	bcm2835_gpio_fsel(TURN_PIN, BCM2835_GPIO_FSEL_ALT0);
+	bcm2835_pwm_set_mode(TURN_PWM_CH, 1, 1);
+	bcm2835_pwm_set_range(TURN_PWM_CH, TURN_PWM_RANGE);
 
 	bcm2835_gpio_fsel(RPI_V2_GPIO_P1_11, BCM2835_GPIO_FSEL_OUTP);
 	bcm2835_gpio_write(RPI_V2_GPIO_P1_11, LOW);
