@@ -29,20 +29,8 @@ void js_button_update(u_int8_t key_id, int16_t value, u_int16_t keys_states)
 	case KEY_SQUARE :
 	case KEY_L1 :
 	case KEY_R1 :
-		return;
 	case KEY_L2 :
-		if (keys_states & BIT(KEY_R2))
-			bcm2835_pwm_set_mode(ACCEL_PWM_CH, 1, (value ? 0 : 1));
-		else if (value)
-			set_backward();
-		return;
-
 	case KEY_R2 :
-		if (keys_states & BIT(KEY_L2))
-			bcm2835_pwm_set_mode(ACCEL_PWM_CH, 1, (value ? 0 : 1));
-		else if (value)
-			set_forward();
-		return;
 	case KEY_SHARE :
 	case KEY_OPTIONS :
 	case KEY_PS_LOGO :
@@ -69,15 +57,13 @@ void js_axis_update(u_int8_t key_id, int16_t value, u_int16_t keys_states)
 	case AXIS_LANALOG_Y :
 		return;
 	case AXIS_L2 :
-		if (keys_states & BIT(KEY_R2))
-			return;
+		set_backward();
 		bcm2835_pwm_set_data(ACCEL_PWM_CH, (u_int32_t)(value + JS_AXIS_MAX));
 	case AXIS_RANALOG_X :
 	case AXIS_RANALOG_Y :
 		return;
 	case AXIS_R2 :
-		if (keys_states & BIT(KEY_L2))
-			return;
+		set_forward();
 		bcm2835_pwm_set_data(ACCEL_PWM_CH, (u_int32_t)(value + JS_AXIS_MAX));
 	case AXIS_DPAD_X :
 	case AXIS_DPAD_Y :
