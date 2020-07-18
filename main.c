@@ -193,17 +193,17 @@ int hw_init(void)
 	bcm2835_pwm_set_mode(TURN_PWM_CH, 1, 1);
 	bcm2835_pwm_set_range(TURN_PWM_CH, TURN_PWM_RANGE);
 
-	bcm2835_gpio_fsel(RPI_V2_GPIO_P1_11, BCM2835_GPIO_FSEL_OUTP);
-	bcm2835_gpio_write(RPI_V2_GPIO_P1_11, LOW);
+	bcm2835_gpio_fsel(IN0, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_write(IN0, LOW);
 
-	bcm2835_gpio_fsel(RPI_V2_GPIO_P1_13, BCM2835_GPIO_FSEL_OUTP);
-	bcm2835_gpio_write(RPI_V2_GPIO_P1_13, LOW);
+	bcm2835_gpio_fsel(IN1, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_write(IN1, LOW);
 
-	bcm2835_gpio_fsel(RPI_V2_GPIO_P1_15, BCM2835_GPIO_FSEL_OUTP);
-	bcm2835_gpio_write(RPI_V2_GPIO_P1_15, LOW);
+	bcm2835_gpio_fsel(IN2, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_write(IN2, LOW);
 
-	bcm2835_gpio_fsel(RPI_V2_GPIO_P1_16, BCM2835_GPIO_FSEL_OUTP);
-	bcm2835_gpio_write(RPI_V2_GPIO_P1_16, LOW);
+	bcm2835_gpio_fsel(IN3, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_write(IN3, LOW);
 
 	return 0;
 }
