@@ -52,7 +52,7 @@ void js_axis_update(u_int8_t key_id, int16_t value, u_int16_t keys_states)
 		else if (value < 0)
 			set_left();
 
-		bcm2835_pwm_set_data(TURN_PWM_CH, (u_int32_t)(abs(value)));
+		bcm2835_pwm_set_data(TURN_PWM_CH, (u_int32_t)(abs(value / TURN_LIMIT_DIV)));
 		return;
 	case AXIS_LANALOG_Y :
 		return;
