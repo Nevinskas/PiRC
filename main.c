@@ -141,12 +141,16 @@ int main(int argc, char **argv)
 {
 	int fd;
 
+	retry:
+
 	fd = open(joystick, O_RDONLY);
 
 	if (fd < 0)
 	{
 		printf("Failed to open %s \n", joystick);
 		perror("Error");
+		sleep(1);
+		goto retry;
 		return 1;
 	}
 
